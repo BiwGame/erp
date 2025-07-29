@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Financials - ERP PTT</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <aside class="sidebar">
+    <h2>PTT ERP</h2>
+    <nav>
+      <a href="index.html"> Home</a>
+      <a href="procurement.html">Procurement</a>
+      <a class="active" href="#"> Financials</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="header">
+      <h1> ข้อมูลการเงิน (Financials)</h1>
+      <a href="#" class="btn">+ เพิ่มรายการ</a>
+    </div>
+
+    <div class="card-container">
+      <div class="card">
+        <h3>รายรับเดือนนี้</h3>
+        <div class="value">฿1,200,000</div>
+      </div>
+      <div class="card">
+        <h3>รายจ่ายเดือนนี้</h3>
+        <div class="value">฿950,000</div>
+      </div>
+      <div class="card">
+        <h3>กำไรสุทธิ</h3>
+        <div class="value">฿250,000</div>
+      </div>
+    </div>
+
+    <div class="table-section">
+      <h2>📄 รายการธุรกรรมล่าสุด</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>วันที่</th>
+            <th>รายการ</th>
+            <th>ประเภท</th>
+            <th>จำนวน</th>
+            <th>จัดการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>28 ก.ค. 2568</td>
+            <td>ค่าเช่าระบบคลาวด์</td>
+            <td>รายจ่าย</td>
+            <td>-฿35,000</td>
+             <td><button class="delete-btn">ลบ</button></td>
+          </tr>
+          <tr>
+            <td>25 ก.ค. 2568</td>
+            <td>ชำระเงินลูกค้าโครงการ A</td>
+            <td>รายรับ</td>
+            <td>+฿150,000</td>
+             <td><button class="delete-btn">ลบ</button></td>
+          </tr>
+          <tr>
+            <td>22 ก.ค. 2568</td>
+            <td>ค่าเดินทางเจ้าหน้าที่</td>
+            <td>รายจ่าย</td>
+            <td>-฿12,500</td>
+             <td><button class="delete-btn">ลบ</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<script>
+  const btnAdd = document.querySelector('.btn');
+  const tbody = document.querySelector('table tbody');
+
+  // ใช้ในการลบรายการ
+  function attachDeleteEvent(button) {
+    button.addEventListener('click', function() {
+      if (confirm('ต้องการลบรายการนี้หรือไม่?')) {
+        const row = button.closest('tr');
+        row.remove();
+      }
+    });
+  }
+
+  // ใส่ event ให้ปุ่มลบที่มีอยู่แล้วตอนโหลดหน้า
+  document.querySelectorAll('.delete-btn').forEach(attachDeleteEvent);
+
+  btnAdd.addEventListener('click', function(e) {
+    e.preventDefault();
+
+    if(document.querySelector('#addForm')) return;
+
+    const form = document.createElement('tr');
+    form.id = 'addForm';
+    form.innerHTML = `
+      <td><input type="date" id="dateInput" required></td>
+      <td><input type="text" id="descInput" placeholder="รายการ" required></td>
+      <td>
+        <select id="typeInput" required>
+          <option value="" disabled selected>เลือกประเภท</option>
+          <option value="รายรับ">รายรับ</option>
+          <option value="รายจ่าย">รายจ่าย</option>
+        </select>
+      </td>
+      <td><input type="number" id="amountInput" placeholder="จำนวน" required></td>
+      <td>
+        <button id="saveBtn">บันทึก</button>
+        <button id="cancelBtn">ยกเลิก</button>
+      </td>
+    `;
+
+    tbody.prepend(form);
+
+    document.getElementById('saveBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      const date = document.getElementById('dateInput').value;
+      const desc = document.getElementById('descInput').value.trim();
+      const type = document.getElementById('typeInput').value;
+      const amount = parseFloat(document.getElementById('amountInput').value);
+
+      if (!date || !desc || !type || isNaN(amount)) {
+        alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+        return;
+      }
+
+      const options = { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'Asia/Bangkok' };
+      const dt = new Date(date);
+      const formattedDate = dt.toLocaleDateString('th-TH', options).replace(' ', ' ').replace('.', '');
+
+      const newRow = document.createElement('tr');
+      newRow.innerHTML = `
+        <td>${formattedDate}</td>
+        <td>${desc}</td>
+        <td>${type}</td>
+        <td>${type === 'รายรับ' ? '+' : '-'}฿${amount.toLocaleString()}</td>
+        <td><button class="delete-btn">ลบ</button></td>
+      `;
+
+      form.remove();
+      tbody.prepend(newRow);
+
+      // เพิ่ม event ให้ปุ่มลบของแถวใหม่
+      attachDeleteEvent(newRow.querySelector('.delete-btn'));
+    });
+
+    document.getElementById('cancelBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      form.remove();
+    });
+  });
+</script>
+
+</body>
+</html>
